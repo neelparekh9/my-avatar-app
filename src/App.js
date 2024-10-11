@@ -3,17 +3,19 @@ import Avatar from "./components/Avatar";
 import Chat from "./components/Chat";
 import "./App.css";
 
+const createNewMessageObject = (text, sender) => ({ text, sender });
+
 function App() {
   const [messages, setMessages] = useState([]);
-  const [lastMessage, setLastMessage] = useState(""); // To track the last message sent to the avatar
+  const [lastMessageObject, setLastMessageObject] = useState(""); // To track the last message sent to the avatar
 
   // Function to send a message and update the message list
   const handleSendMessage = (message) => {
-    const newMessage = { text: message, sender: "User" };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    const newMessageObject = createNewMessageObject(message, "User");
+    setMessages((prevMessages) => [...prevMessages, newMessageObject]);
 
     // Send the message to the avatar to trigger animations
-    setLastMessage(message); // Update the last message for the avatar
+    setLastMessageObject(newMessageObject); // Update the last message for the avatar
 
     // Check if the message is a command for the avatar (optional, keeping your postMessage handling intact)
     if (message.startsWith("/avatar ")) {
@@ -24,8 +26,8 @@ function App() {
 
   // Function to handle messages sent from the avatar
   const handleSendAvatarMessage = (message) => {
-    const newMessage = { text: message, sender: "Avatar" };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    const newMessageObject = createNewMessageObject(message, "Avatar");
+    setMessages((prevMessages) => [...prevMessages, newMessageObject]);
   };
 
   // Handle messages from the avatar (received via postMessage)
@@ -55,7 +57,7 @@ function App() {
       {/* Avatar Section */}
       <div className="avatar-section">
         {/* Avatar Model */}
-        <Avatar chatMessage={lastMessage} onSendAvatarMessage={handleSendAvatarMessage} />
+        <Avatar chatMessageObject={lastMessageObject} onSendAvatarMessage={handleSendAvatarMessage} />
       </div>
 
       {/* Chat Section */}
