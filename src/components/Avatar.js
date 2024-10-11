@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { useGLTF, OrbitControls, useFBX, useAnimations } from "@react-three/drei";
 import * as THREE from 'three';
 import Speech from './Speech'; // Import the Speech component
+import { animationKeyResponseMap } from "../constants";
 
 // Component for rendering the avatar and handling gestures inside Canvas
 const AvatarModel = ({ avatarUrl, currentAnimation, setCurrentAnimation }) => {
@@ -53,22 +54,16 @@ const AvatarModel = ({ avatarUrl, currentAnimation, setCurrentAnimation }) => {
   return <primitive object={scene} ref={group} scale={[2.5, 2.5, 2.5]} position={[0, -1.5, 0]} />;
 };
 
-const Avatar = ({ onSendAvatarMessage, chatMessage }) => {
+const Avatar = ({ onSendAvatarMessage, chatMessageObject }) => {
   const avatarUrl = "/models/original-avatar.glb"; // Base avatar GLTF URL
   const speechRef = useRef(); // Reference to the Speech component
 
-  const animationOptions = {
-    hi: "Wave",
-    yes: "NodYes",
-    no: "ShakeNo",
-  };
-
   // Initially set to "Idle" animation
-  const [currentAnimation, setCurrentAnimation] = React.useState("Idle");
+  const [currentAnimation, setCurrentAnimation] = React.useState(animationKeyResponseMap.idle.animation);
 
-  const handleAnimationSwitch = (animation) => {
-    setCurrentAnimation(animation);
-    const response = animation === "Wave" ? "Hello!" : animation === "NodYes" ? "Yes, I agree!" : "No, I disagree!";
+  const handleAnimationSwitch = (animationResponseAndAnimationObject) => {
+    setCurrentAnimation(animationResponseAndAnimationObject.animation);
+    const response = animationResponseAndAnimationObject.response || "";
     onSendAvatarMessage(response); // Send a response based on the animation
 
     // Trigger speech when the avatar responds
@@ -78,17 +73,17 @@ const Avatar = ({ onSendAvatarMessage, chatMessage }) => {
   };
 
   useEffect(() => {
-    if (chatMessage) {
-      const messageLower = chatMessage.toLowerCase();
+    if (chatMessageObject) {
+      const messageLower = chatMessageObject.text.toLowerCase();
       if (messageLower.includes("hi")) {
-        handleAnimationSwitch(animationOptions.hi);
+        handleAnimationSwitch(animationKeyResponseMap.hi);
       } else if (messageLower.includes("yes")) {
-        handleAnimationSwitch(animationOptions.yes);
+        handleAnimationSwitch(animationKeyResponseMap.yes);
       } else if (messageLower.includes("no")) {
-        handleAnimationSwitch(animationOptions.no);
+        handleAnimationSwitch(animationKeyResponseMap.no);
       }
     }
-  }, [chatMessage]);
+  }, [chatMessageObject]);
 
   return (
     <div className="avatar-section">
@@ -114,9 +109,9 @@ const Avatar = ({ onSendAvatarMessage, chatMessage }) => {
 
       {/* Animation Control Buttons */}
       <div className="controls">
-        <button onClick={() => handleAnimationSwitch(animationOptions.hi)}>Wave</button>
-        <button onClick={() => handleAnimationSwitch(animationOptions.yes)}>Nod Yes</button>
-        <button onClick={() => handleAnimationSwitch(animationOptions.no)}>Shake No</button>
+        <button onClick={() => handleAnimationSwitch(animationKeyResponseMap.hi)}>Wave</button>
+        <button onClick={() => handleAnimationSwitch(animationKeyResponseMap.yes)}>Nod Yes</button>
+        <button onClick={() => handleAnimationSwitch(animationKeyResponseMap.no)}>Shake No</button>
       </div>
     </div>
   );
