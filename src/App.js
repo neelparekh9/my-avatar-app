@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Avatar from "./components/Avatar";
-import Chat from "./components/Chat";
+import InteractiveChat from "./components/InteractiveChat"; // Import the new component
+import Speech from "./components/Speech"; // Import the Speech component
 import "./App.css";
 
 const createNewMessageObject = (text, sender) => ({ text, sender });
 
 function App() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]); // This will keep track of all chat messages
   const [lastMessageObject, setLastMessageObject] = useState(""); // To track the last message sent to the avatar
+  const [currentAnimation, setCurrentAnimation] = useState("Idle"); // Track the current animation state
+  const speechRef = useRef(); // Reference to the Speech component
 
   // Function to send a message and update the message list
   const handleSendMessage = (message) => {
@@ -25,45 +28,56 @@ function App() {
   };
 
   // Function to handle messages sent from the avatar
-  const handleSendAvatarMessage = (message) => {
+  const handleSendAvatarMessage = (message, animation) => {
     const newMessageObject = createNewMessageObject(message, "Avatar");
-    setMessages((prevMessages) => [...prevMessages, newMessageObject]);
+    setMessages((prevMessages) => [...prevMessages, newMessageObject]); // Log agent message in the chat
+
+    // Trigger speech when the avatar responds
+    if (speechRef.current) {
+      speechRef.current.speak(message);
+    }
+
+    // Trigger animation if provided
+    if (animation) {
+      setCurrentAnimation(animation); // Set the current animation for the Avatar component
+    }
   };
-
-  // Handle messages from the avatar (received via postMessage)
-  useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.origin === "https://readyplayer.me") {
-        const avatarMessage = event.data;
-
-        const avatarResponse =
-          typeof avatarMessage === "string"
-            ? avatarMessage
-            : avatarMessage.text;
-
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { text: avatarResponse, sender: "Avatar" },
-        ]);
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
 
   return (
     <div className="container">
-      {/* Avatar Section */}
-      <div className="avatar-section">
-        {/* Avatar Model */}
-        <Avatar chatMessageObject={lastMessageObject} onSendAvatarMessage={handleSendAvatarMessage} />
+      {/* Avatar and buttons section */}
+      <div className="left-section">
+        <div className="avatar-section">
+          {/* Avatar Model */}
+          <Avatar
+            chatMessageObject={lastMessageObject}
+            currentAnimation={currentAnimation} // Pass the current animation state to Avatar component
+            onSendAvatarMessage={handleSendAvatarMessage}
+          />
+        </div>
+
+        {/* Interactive Chat Section */}
+        <div className="interactive-chat-section">
+          <InteractiveChat onSendAgentMessage={handleSendAvatarMessage} speechRef={speechRef} />
+        </div>
       </div>
 
-      {/* Chat Section */}
+      {/* Chat Section on the right */}
       <div className="chat-section">
-        <Chat messages={messages} onSendMessage={handleSendMessage} />
+        <div className="chat-box">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`chat-message ${message.sender === "User" ? "User" : "Avatar"}`}
+            >
+              {message.text}
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* Speech Component */}
+      <Speech ref={speechRef} />
     </div>
   );
 }

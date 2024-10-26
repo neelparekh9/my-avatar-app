@@ -3,107 +3,105 @@ body, html {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
   font-family: Arial, sans-serif;
+  box-sizing: border-box;
 }
 
 /* Main container for the entire page */
 .container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Arrange avatar/buttons on the left and chat on the right */
   height: 100vh;
+  width: 100vw;
 }
 
-/* Avatar section taking up 60% of the screen */
-.avatar-section {
-  flex: 60%;
-  background-color: #f0f0f0;
+/* Left section for avatar and buttons, now taking up 70% of the width */
+.left-section {
+  flex: 7; /* 7 parts out of a total of 10 (70%) */
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Stack avatar and buttons vertically */
+  background-color: #f0f0f0;
+}
+
+/* Avatar section */
+.avatar-section {
+  flex: 80%;
+  display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  background-color: #f0f0f0;
+  padding: 20px;
 }
 
 /* Controls section for buttons, positioned under the avatar */
-.controls {
+.interactive-chat-section {
+  flex: 20%;
+  padding: 20px;
   display: flex;
-  justify-content: center;
-  margin-top: auto;
-  gap: 10px;
-  width: 100%;
-  padding: 20px 0;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Button styling */
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-/* Button hover effect */
-button:hover {
-  background-color: #0056b3;
-}
-
-/* Chat section taking up the remaining 40% */
+/* Chat section taking up the remaining 30% */
 .chat-section {
-  flex: 40%;
+  flex: 3; /* 3 parts out of a total of 10 (30%) */
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
-  overflow-y: auto;
+  padding: 20px;
+  overflow-y: auto; /* Enable scrolling when chat messages exceed the height */
 }
 
-/* The area where chat messages are displayed */
+/* Chat box where the chat messages are displayed */
 .chat-box {
   flex: 1;
-  overflow-y: auto; /* Allow scrolling when the chat box fills up */
-  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   background-color: #f7f7f7;
+  padding: 10px;
+  border-radius: 10px;
+  overflow-y: auto;
 }
 
-/* Individual chat message styling */
+/* Styling individual chat messages */
 .chat-message {
   padding: 10px 15px;
-  border-radius: 15px;
+  border-radius: 10px;
   max-width: 70%;
   word-wrap: break-word;
 }
 
-/* Styling for the user's messages */
+/* User message styling */
 .chat-message.User {
   align-self: flex-end;
   background-color: #007bff;
   color: white;
 }
 
-/* Styling for the avatar's messages */
+/* Avatar message styling */
 .chat-message.Avatar {
   align-self: flex-start;
   background-color: #eaeaea;
   color: #333;
 }
 
-/* Input section for sending messages */
-.input-section {
-  display: flex;
-  padding: 10px;
-  background-color: #fff;
-  border-top: 1px solid #ccc;
+/* Button styling */
+button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
 }
 
-/* The input field for typing a message */
-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-right: 10px;
+/* Button hover effect */
+button:hover {
+  background-color: #218838;
 }

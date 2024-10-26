@@ -3,7 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { useGLTF, OrbitControls, useFBX, useAnimations } from "@react-three/drei";
 import * as THREE from 'three';
 import Speech from './Speech'; // Import the Speech component
-import { animationKeyResponseMap } from "../constants";
+import { animationKeyResponseMap } from "../Constants";
 
 // Component for rendering the avatar and handling gestures inside Canvas
 const AvatarModel = ({ avatarUrl, currentAnimation, setCurrentAnimation }) => {
@@ -54,42 +54,41 @@ const AvatarModel = ({ avatarUrl, currentAnimation, setCurrentAnimation }) => {
   return <primitive object={scene} ref={group} scale={[2.5, 2.5, 2.5]} position={[0, -1.5, 0]} />;
 };
 
-const Avatar = ({ onSendAvatarMessage, chatMessageObject }) => {
+const Avatar = ({ onSendAvatarMessage, chatMessageObject, currentAnimation }) => {
   const avatarUrl = "/models/original-avatar.glb"; // Base avatar GLTF URL
   const speechRef = useRef(); // Reference to the Speech component
 
   // Initially set to "Idle" animation
-  const [currentAnimation, setCurrentAnimation] = React.useState(animationKeyResponseMap.idle.animation);
-
-  const handleAnimationSwitch = (animationResponseAndAnimationObject) => {
-    setCurrentAnimation(animationResponseAndAnimationObject.animation);
-    const response = animationResponseAndAnimationObject.response || "";
-    onSendAvatarMessage(response); // Send a response based on the animation
-
-    // Trigger speech when the avatar responds
-    if (speechRef.current) {
-      speechRef.current.speak(response);
-    }
-  };
+  const [localAnimation, setLocalAnimation] = React.useState(animationKeyResponseMap.idle.animation);
 
   useEffect(() => {
     if (chatMessageObject) {
       const messageLower = chatMessageObject.text.toLowerCase();
       if (messageLower.includes("hi")) {
-        handleAnimationSwitch(animationKeyResponseMap.hi);
+        setLocalAnimation(animationKeyResponseMap.hi.animation);
+        onSendAvatarMessage(animationKeyResponseMap.hi.response);
       } else if (messageLower.includes("yes")) {
-        handleAnimationSwitch(animationKeyResponseMap.yes);
+        setLocalAnimation(animationKeyResponseMap.yes.animation);
+        onSendAvatarMessage(animationKeyResponseMap.yes.response);
       } else if (messageLower.includes("no")) {
-        handleAnimationSwitch(animationKeyResponseMap.no);
+        setLocalAnimation(animationKeyResponseMap.no.animation);
+        onSendAvatarMessage(animationKeyResponseMap.no.response);
       }
     }
-  }, [chatMessageObject]);
+  }, [chatMessageObject, onSendAvatarMessage]);
+
+  // UseEffect to update the animation passed from parent (App.js)
+  useEffect(() => {
+    if (currentAnimation) {
+      setLocalAnimation(currentAnimation);
+    }
+  }, [currentAnimation]);
 
   return (
     <div className="avatar-section">
       <Canvas
         className="avatar-canvas"
-        camera={{ position: [0, 3.7, 5], fov: 60 }} 
+        camera={{ position: [0, 3.7, 5], fov: 60 }}
       >
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={1.5} />
@@ -99,20 +98,13 @@ const Avatar = ({ onSendAvatarMessage, chatMessageObject }) => {
         {/* Load the base avatar and handle the animation */}
         <AvatarModel
           avatarUrl={avatarUrl}
-          currentAnimation={currentAnimation}
-          setCurrentAnimation={setCurrentAnimation}
+          currentAnimation={localAnimation}
+          setCurrentAnimation={setLocalAnimation}
         />
       </Canvas>
 
       {/* Speech component (does not render anything, just handles speech) */}
       <Speech ref={speechRef} />
-
-      {/* Animation Control Buttons */}
-      <div className="controls">
-        <button onClick={() => handleAnimationSwitch(animationKeyResponseMap.hi)}>Wave</button>
-        <button onClick={() => handleAnimationSwitch(animationKeyResponseMap.yes)}>Nod Yes</button>
-        <button onClick={() => handleAnimationSwitch(animationKeyResponseMap.no)}>Shake No</button>
-      </div>
     </div>
   );
 };
